@@ -1,49 +1,81 @@
-// Navbar background change on scroll
-window.addEventListener('scroll', function() {
-    const navbar = document.querySelector('.navbar');
-    const homeSection = document.querySelector('#HOME');
+const navbar = document.querySelector(".navbar");
+const homeSection = document.querySelector("#HOME");
+const navLinks = document.querySelectorAll(".navbar .nav-link");
+const sections = [...document.querySelectorAll("header[id], section[id], div[id='ABOUT']")];
+
+function updateNavbar() {
+    if (!navbar || !homeSection) return;
+
     const homeSectionHeight = homeSection.offsetHeight;
-    
-    if (window.scrollY > homeSectionHeight - 100) {
-        navbar.classList.add('navbar-scrolled');
-    } else {
-        navbar.classList.remove('navbar-scrolled');
-    }
+    navbar.classList.toggle("navbar-scrolled", window.scrollY > homeSectionHeight - 100);
+}
+
+function updateActiveLink() {
+    const currentSection = sections
+        .filter(section => window.scrollY >= section.offsetTop - 120)
+        .at(-1);
+
+    if (!currentSection) return;
+
+    navLinks.forEach(link => {
+        link.classList.toggle("active", link.getAttribute("href") === `#${currentSection.id}`);
+    });
+}
+
+window.addEventListener("scroll", () => {
+    updateNavbar();
+    updateActiveLink();
 });
 
-// Animated counters
+navLinks.forEach(link => {
+    link.addEventListener("click", () => {
+        const menu = document.querySelector(".navbar-collapse.show");
+
+        if (menu && window.bootstrap) {
+            bootstrap.Collapse.getOrCreateInstance(menu).hide();
+        }
+    });
+});
+
+updateNavbar();
+updateActiveLink();
+
 function animateCounters() {
-    const counters = document.querySelectorAll('.counter');
-    const speed = 200; // The lower the slower
+    const counters = document.querySelectorAll(".counter");
+    const speed = 180;
 
     counters.forEach(counter => {
-        const updateCount = () => {
-            const target = +counter.getAttribute('data-target');
-            const count = +counter.innerText;
-            const inc = target / speed;
+        const target = Number(counter.getAttribute("data-target"));
+        const increment = Math.max(1, Math.ceil(target / speed));
 
-            if (count < target) {
-                counter.innerText = Math.ceil(count + inc);
-                setTimeout(updateCount, 1);
-            } else {
-                counter.innerText = target;
+        counter.innerText = "0";
+
+        const updateCount = () => {
+            const count = Number(counter.innerText);
+            const nextValue = Math.min(target, count + increment);
+
+            counter.innerText = nextValue;
+
+            if (nextValue < target) {
+                requestAnimationFrame(updateCount);
             }
         };
+
         updateCount();
     });
 }
 
-// Intersection Observer for counters animation
-const counterSection = document.querySelector('.divi');
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            animateCounters();
-            observer.unobserve(entry.target);
-        }
-    });
-}, { threshold: 0.5 });
+const counterSection = document.querySelector(".divi");
 
 if (counterSection) {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                animateCounters();
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.45 });
+
     observer.observe(counterSection);
 }
