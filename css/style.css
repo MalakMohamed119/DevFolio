@@ -387,9 +387,27 @@ nav.navbar {
   border-radius: 50%;
   background: white;
   color: var(--accent);
-  font-size: 1.4rem;
-  line-height: 1;
+  position: absolute;
+  font-size: 0;
+  line-height: 0;
   transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
+}
+
+.work .btn::before,
+.work .btn::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  transform: translate(-50%, -50%);
+}
+
+.work .btn::after {
+  transform: translate(-50%, -50%) rotate(90deg);
 }
 
 .work .btn:hover {
